@@ -148,9 +148,15 @@ def generate_report():
         report_gen = ReportGenerator(project_path, findings, applied_fixes, summary)
         
         if format_type == 'pdf':
-            content = report_gen.generate_pdf()
-            filename = f'security_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
-            is_binary = True
+            try:
+                content = report_gen.generate_pdf()
+                filename = f'security_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
+                is_binary = True
+            except Exception as e:
+                return jsonify({
+                    'success': False,
+                    'error': f'PDF generation failed: {str(e)}. Falling back to Markdown.'
+                }), 500
         elif format_type == 'html':
             content = report_gen.generate_html()
             filename = f'security_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.html'
