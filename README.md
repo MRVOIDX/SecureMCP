@@ -485,7 +485,7 @@ docker run -p 5000:5000 -e GOOGLE_API_KEY=your_key securemcp
 
 ## 📞 Support & Contact
 
-- **Email:** your.email@university.edu
+- **Email:** 78704@office.mans.org.pl
 - **Issues:** Create an issue on GitHub
 - **Questions:** Check documentation page
 - **University Project:** Submitted as coursework
