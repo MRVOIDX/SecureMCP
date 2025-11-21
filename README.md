@@ -75,11 +75,6 @@ Perfect for university projects, open-source contributions, and production appli
 - **Vanilla JavaScript** - Interactive scanner experience
 - **Bootstrap-inspired Design** - Professional styling
 
-### Deployment
-- **Runtime:** Python 3.10+
-- **Server:** Werkzeug WSGI server
-- **Platform:** Replit (Cloud-based)
-
 ---
 
 ## 🔐 Vulnerability Detection
