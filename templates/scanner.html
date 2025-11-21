@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}SecureMCP - Scanner{% endblock %}
+
+{% block content %}
+<div class="scanner-container">
+    <div class="scanner-header">
+        <h1>🔍 Security Scanner</h1>
+        <p>Upload your project or specify a directory to analyze for security vulnerabilities</p>
+    </div>
+
+    <div class="scanner-grid">
+        <div class="scanner-left">
+            <div class="scan-card">
+                <h2>📂 Analyze Your Project</h2>
+                
+                <div class="upload-section">
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">📁</div>
+                        <h3>Upload Project File</h3>
+                        <p>Drag & drop a ZIP file or click to browse</p>
+                        <input type="file" id="fileInput" accept=".zip" style="display: none;">
+                        <button class="btn btn-upload" id="uploadBtn">Choose File</button>
+                    </div>
+                </div>
+
+                <div class="divider">
+                    <span>OR</span>
+                </div>
+
+                <div class="path-section">
+                    <label for="projectPath">Scan Directory Path:</label>
+                    <input type="text" id="projectPath" placeholder="e.g., ./my-project">
+                    <button id="scanBtn" class="btn btn-primary btn-scan">
+                        <span class="btn-icon">🔍</span>
+                        Scan Directory
+                    </button>
+                </div>
+
+                <div id="uploadProgress" class="upload-progress" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <p class="progress-text" id="progressText">Processing your project...</p>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <h3>💡 Quick Tips</h3>
+                <ul>
+                    <li>Compress your project as ZIP before uploading</li>
+                    <li>Larger projects may take longer to scan</li>
+                    <li>Review all findings before deploying</li>
+                    <li>Use generated reports for team discussions</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="scanner-right">
+            <div id="summarySection" class="summary-card" style="display: none;">
+                <h2>📊 Scan Summary</h2>
+                <div class="summary-stats">
+                    <div class="stat-box">
+                        <div class="stat-number" id="totalFindings">0</div>
+                        <div class="stat-label">Issues Found</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="filesScanned">0</div>
+                        <div class="stat-label">Files Scanned</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number stat-critical" id="criticalCount">0</div>
+                        <div class="stat-label">Critical</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number stat-high" id="highCount">0</div>
+                        <div class="stat-label">High Risk</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number stat-medium" id="mediumCount">0</div>
+                        <div class="stat-label">Medium</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="findingsSection" style="display: none;">
+                <div class="findings-header">
+                    <h2>🔎 Security Findings</h2>
+                    <button id="generateReportBtn" class="btn btn-secondary">
+                        <span class="btn-icon">📄</span>
+                        Generate Report
+                    </button>
+                </div>
+                <div id="findingsList" class="findings-list"></div>
+            </div>
+
+            <div id="reportSection" class="report-card" style="display: none;">
+                <h2>✅ Report Generated</h2>
+                <p>Your comprehensive security report is ready!</p>
+                <div class="report-actions">
+                    <button id="viewReportBtn" class="btn btn-primary">View Report</button>
+                    <button id="downloadReportBtn" class="btn btn-secondary">Download Report</button>
+                </div>
+                <div id="reportPreview" class="report-preview" style="display: none;"></div>
+            </div>
+
+            <div id="emptyState" class="empty-state">
+                <div class="empty-icon">🚀</div>
+                <h3>Ready to Scan?</h3>
+                <p>Upload your project file or enter a directory path to start the security analysis.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='scanner.js') }}"></script>
+{% endblock %}

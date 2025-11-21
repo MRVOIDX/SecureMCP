@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}SecureMCP - Home{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <h1 class="hero-title">🛡️ Secure Your Code with AI</h1>
+        <p class="hero-subtitle">Advanced Security Analysis Powered by Gemini AI</p>
+        <p class="hero-description">SecureMCP scans your projects for 20+ types of security vulnerabilities, provides AI-powered explanations, and suggests fixes.</p>
+        
+        <div class="hero-stats">
+            <div class="stat-item">
+                <span class="stat-value">20+</span>
+                <span class="stat-text">Vulnerability Types</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">81</span>
+                <span class="stat-text">Detection Patterns</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">17</span>
+                <span class="stat-text">Security Categories</span>
+            </div>
+        </div>
+        
+        <div class="hero-actions">
+            <a href="{{ url_for('scanner') }}" class="btn btn-primary btn-lg">
+                <span class="btn-icon">🚀</span> Start Scanning
+            </a>
+            <a href="{{ url_for('documentation') }}" class="btn btn-secondary btn-lg">
+                <span class="btn-icon">📖</span> Learn More
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="features">
+    <h2>Why Choose SecureMCP?</h2>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">🤖</div>
+            <h3>AI-Powered Analysis</h3>
+            <p>Uses Google Gemini 1.5 Flash to provide intelligent explanations and context-aware fix suggestions.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">🎯</div>
+            <h3>Comprehensive Detection</h3>
+            <p>Detects hardcoded secrets, SQL injection, XSS, command injection, and 17+ other vulnerability categories.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>Professional Reports</h3>
+            <p>Generate detailed security reports with severity scores, impact assessments, and actionable recommendations.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3>Quick Scans</h3>
+            <p>Analyze your entire project in seconds and get instant feedback on security issues.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">✅</div>
+            <h3>Fix Suggestions</h3>
+            <p>Get AI-generated fix suggestions for each vulnerability with before/after code examples.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">📝</div>
+            <h3>Easy Integration</h3>
+            <p>Upload ZIP files or scan local directories. Export reports as Markdown or HTML.</p>
+        </div>
+    </div>
+</section>
+
+<section class="how-it-works">
+    <h2>How It Works</h2>
+    <div class="steps-grid">
+        <div class="step">
+            <div class="step-number">1</div>
+            <h3>Upload Project</h3>
+            <p>Submit your project as a ZIP file or specify a directory path</p>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            <h3>Analyze</h3>
+            <p>SecureMCP scans your code against 81 security patterns</p>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <h3>Review</h3>
+            <p>Get detailed explanations of each vulnerability found</p>
+        </div>
+        <div class="step">
+            <div class="step-number">4</div>
+            <h3>Fix</h3>
+            <p>Apply AI-suggested fixes or manually address issues</p>
+        </div>
+        <div class="step">
+            <div class="step-number">5</div>
+            <h3>Report</h3>
+            <p>Download comprehensive security reports</p>
+        </div>
+    </div>
+</section>
+
+<section class="cta">
+    <h2>Ready to Secure Your Project?</h2>
+    <p>Start your first security scan today and get actionable insights.</p>
+    <a href="{{ url_for('scanner') }}" class="btn btn-primary btn-lg">
+        <span class="btn-icon">🔍</span> Start Scanning
+    </a>
+</section>
+{% endblock %}

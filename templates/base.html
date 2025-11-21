@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SecureMCP - AI-Powered Security Analysis{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="{{ url_for('index') }}" class="brand-link">
+                    <span class="brand-icon">🛡️</span>
+                    <span class="brand-name">SecureMCP</span>
+                </a>
+            </div>
+            
+            <div class="nav-menu" id="navMenu">
+                <a href="{{ url_for('index') }}" class="nav-link{% if request.endpoint == 'index' %} active{% endif %}">
+                    <span class="nav-icon">🏠</span> Home
+                </a>
+                <a href="{{ url_for('scanner') }}" class="nav-link{% if request.endpoint == 'scanner' %} active{% endif %}">
+                    <span class="nav-icon">🔍</span> Scanner
+                </a>
+                <a href="{{ url_for('about') }}" class="nav-link{% if request.endpoint == 'about' %} active{% endif %}">
+                    <span class="nav-icon">📋</span> What We Detect
+                </a>
+                <a href="{{ url_for('documentation') }}" class="nav-link{% if request.endpoint == 'documentation' %} active{% endif %}">
+                    <span class="nav-icon">📚</span> Documentation
+                </a>
+            </div>
+            
+            <button class="mobile-toggle" id="mobileToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 SecureMCP. Powered by Google Gemini AI. | <a href="https://github.com" target="_blank">GitHub</a></p>
+        </div>
+    </footer>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    {% block page_scripts %}{% endblock %}
+</body>
+</html>

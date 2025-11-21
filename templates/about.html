@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}SecureMCP - What We Detect{% endblock %}
+
+{% block content %}
+<div class="about-container">
+    <div class="about-header">
+        <h1>🔍 What We Detect</h1>
+        <p>SecureMCP scans for 20+ types of security vulnerabilities across 17 categories with 81+ detection patterns</p>
+    </div>
+
+    <div class="categories-section">
+        <div class="category-group">
+            <h2>🔴 Critical Vulnerabilities</h2>
+            <div class="category-list">
+                <div class="category-item severity-critical">
+                    <h3>🔑 Hardcoded Secrets</h3>
+                    <p>Detects API keys, passwords, tokens, AWS credentials, and database connection strings hardcoded in source files.</p>
+                    <div class="risk-level">Risk Level: CRITICAL</div>
+                </div>
+                
+                <div class="category-item severity-critical">
+                    <h3>💉 SQL Injection</h3>
+                    <p>Identifies SQL queries built with string concatenation, f-strings, or template literals that are vulnerable to injection attacks.</p>
+                    <div class="risk-level">Risk Level: CRITICAL</div>
+                </div>
+                
+                <div class="category-item severity-critical">
+                    <h3>⚡ Command Injection</h3>
+                    <p>Detects os.system(), subprocess with shell=True, exec(), eval() that could execute arbitrary commands.</p>
+                    <div class="risk-level">Risk Level: CRITICAL</div>
+                </div>
+                
+                <div class="category-item severity-critical">
+                    <h3>🛡️ Weak Authentication</h3>
+                    <p>Identifies authentication bypass vulnerabilities, disabled auth, and hardcoded credentials comparisons.</p>
+                    <div class="risk-level">Risk Level: CRITICAL</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-group">
+            <h2>🟠 High-Risk Issues</h2>
+            <div class="category-list">
+                <div class="category-item severity-high">
+                    <h3>🌐 Insecure HTTP</h3>
+                    <p>Detects HTTP URLs instead of HTTPS, exposing data transmission to man-in-the-middle attacks.</p>
+                    <div class="risk-level">Risk Level: HIGH</div>
+                </div>
+                
+                <div class="category-item severity-high">
+                    <h3>💻 Cross-Site Scripting (XSS)</h3>
+                    <p>Finds innerHTML manipulation, document.write(), eval(), dangerouslySetInnerHTML, and jQuery html() usage.</p>
+                    <div class="risk-level">Risk Level: HIGH</div>
+                </div>
+                
+                <div class="category-item severity-high">
+                    <h3>📝 Path Traversal</h3>
+                    <p>Identifies directory traversal patterns and unsafe file operations that could access unauthorized files.</p>
+                    <div class="risk-level">Risk Level: HIGH</div>
+                </div>
+                
+                <div class="category-item severity-high">
+                    <h3>🔓 File Upload Vulnerabilities</h3>
+                    <p>Detects unrestricted file uploads without proper validation or sanitization.</p>
+                    <div class="risk-level">Risk Level: HIGH</div>
+                </div>
+
+                <div class="category-item severity-high">
+                    <h3>⚙️ Insecure Configuration</h3>
+                    <p>Finds debug mode enabled, SSL verification disabled, CORS allowing all origins, and weak cookies.</p>
+                    <div class="risk-level">Risk Level: HIGH</div>
+                </div>
+
+                <div class="category-item severity-high">
+                    <h3>🔐 Weak File Permissions</h3>
+                    <p>Detects chmod 777 and other overly permissive file permissions (world-writable).</p>
+                    <div class="risk-level">Risk Level: HIGH</div>
+                </div>
+
+                <div class="category-item severity-high">
+                    <h3>💾 Weak Password Storage</h3>
+                    <p>Identifies MD5/SHA1 hashing for passwords instead of bcrypt/argon2/pbkdf2.</p>
+                    <div class="risk-level">Risk Level: HIGH</div>
+                </div>
+
+                <div class="category-item severity-high">
+                    <h3>📂 Exposed Config Files</h3>
+                    <p>Finds exposed .env files, AWS credentials, SSH private keys, and other sensitive config files.</p>
+                    <div class="risk-level">Risk Level: HIGH</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-group">
+            <h2>🟨 Medium & Low Issues</h2>
+            <div class="category-list">
+                <div class="category-item severity-medium">
+                    <h3>💾 Sensitive Data Storage</h3>
+                    <p>Detects tokens, passwords, and secrets stored in localStorage or sessionStorage.</p>
+                    <div class="risk-level">Risk Level: MEDIUM</div>
+                </div>
+                
+                <div class="category-item severity-medium">
+                    <h3>✔️ Missing Input Validation</h3>
+                    <p>Identifies unvalidated request parameters and user input without sanitization.</p>
+                    <div class="risk-level">Risk Level: MEDIUM</div>
+                </div>
+
+                <div class="category-item severity-low">
+                    <h3>🔒 Missing Security Headers</h3>
+                    <p>Finds routes without proper security headers like X-Frame-Options and weak Flask secrets.</p>
+                    <div class="risk-level">Risk Level: LOW</div>
+                </div>
+
+                <div class="category-item severity-low">
+                    <h3>⏱️ No Rate Limiting</h3>
+                    <p>Detects API endpoints without rate limiting protection against brute-force attacks.</p>
+                    <div class="risk-level">Risk Level: LOW</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="detection-stats">
+        <h2>Detection Coverage</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">81</div>
+                <div class="stat-description">Security Patterns</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">17</div>
+                <div class="stat-description">Vulnerability Categories</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">28</div>
+                <div class="stat-description">File Types Scanned</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">20+</div>
+                <div class="stat-description">Vulnerability Types</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}SecureMCP - Documentation{% endblock %}
+
+{% block content %}
+<div class="docs-container">
+    <div class="docs-header">
+        <h1>📚 Documentation</h1>
+        <p>Learn how to use SecureMCP and understand security best practices</p>
+    </div>
+
+    <div class="docs-grid">
+        <div class="docs-sidebar">
+            <nav class="docs-nav">
+                <h3>Getting Started</h3>
+                <ul>
+                    <li><a href="#quick-start">Quick Start</a></li>
+                    <li><a href="#how-it-works">How It Works</a></li>
+                    <li><a href="#uploading">Uploading Projects</a></li>
+                </ul>
+
+                <h3>Features</h3>
+                <ul>
+                    <li><a href="#scanning">Scanning</a></li>
+                    <li><a href="#reports">Reports</a></li>
+                    <li><a href="#fixes">Fix Suggestions</a></li>
+                </ul>
+
+                <h3>Security Best Practices</h3>
+                <ul>
+                    <li><a href="#secrets">Secret Management</a></li>
+                    <li><a href="#https">HTTPS</a></li>
+                    <li><a href="#authentication">Authentication</a></li>
+                </ul>
+            </nav>
+        </div>
+
+        <div class="docs-content">
+            <section id="quick-start">
+                <h2>🚀 Quick Start</h2>
+                <ol>
+                    <li>Go to the <a href="{{ url_for('scanner') }}">Scanner page</a></li>
+                    <li>Upload your project as a ZIP file</li>
+                    <li>Review the findings</li>
+                    <li>Apply fixes or download the report</li>
+                </ol>
+            </section>
+
+            <section id="how-it-works">
+                <h2>⚙️ How It Works</h2>
+                <p>SecureMCP uses a combination of pattern matching and AI analysis:</p>
+                <ol>
+                    <li><strong>Pattern Detection:</strong> Scans your code against 81 security patterns</li>
+                    <li><strong>AI Analysis:</strong> Google Gemini AI analyzes each finding for context</li>
+                    <li><strong>Recommendations:</strong> Provides detailed explanations and fix suggestions</li>
+                    <li><strong>Reporting:</strong> Generates comprehensive security reports</li>
+                </ol>
+            </section>
+
+            <section id="uploading">
+                <h2>📤 Uploading Projects</h2>
+                <p>SecureMCP accepts ZIP files. To prepare your project:</p>
+                <ol>
+                    <li>Compress your project folder</li>
+                    <li>Ensure it's in ZIP format</li>
+                    <li>Maximum size: 50MB</li>
+                    <li>Include all relevant source files</li>
+                </ol>
+            </section>
+
+            <section id="scanning">
+                <h2>🔍 Scanning</h2>
+                <p>The scanner analyzes:</p>
+                <ul>
+                    <li>Python, JavaScript, TypeScript files</li>
+                    <li>Java, PHP, Ruby, Go, C/C++ code</li>
+                    <li>HTML, Vue, Svelte templates</li>
+                    <li>Configuration files (.env, .yml, .json, etc.)</li>
+                </ul>
+                <p>It checks for hardcoded secrets, SQL injection, XSS, command injection, and 17+ other vulnerabilities.</p>
+            </section>
+
+            <section id="reports">
+                <h2>📄 Reports</h2>
+                <p>Generate professional security reports in:</p>
+                <ul>
+                    <li><strong>Markdown:</strong> Great for version control</li>
+                    <li><strong>HTML:</strong> Perfect for sharing with stakeholders</li>
+                </ul>
+                <p>Reports include severity scores, impact assessments, and actionable recommendations.</p>
+            </section>
+
+            <section id="fixes">
+                <h2>💡 Fix Suggestions</h2>
+                <p>Each finding includes:</p>
+                <ul>
+                    <li>Description of the vulnerability</li>
+                    <li>Why it's dangerous</li>
+                    <li>Suggested code fix</li>
+                    <li>Best practices reference</li>
+                </ul>
+            </section>
+
+            <section id="secrets">
+                <h2>🔑 Secret Management</h2>
+                <p><strong>Don't:</strong> Hardcode API keys, passwords, or tokens in your source code</p>
+                <p><strong>Do:</strong> Use environment variables or dedicated secret management tools:</p>
+                <ul>
+                    <li>Python: <code>python-dotenv</code></li>
+                    <li>Node.js: <code>dotenv</code></li>
+                    <li>Cloud: AWS Secrets Manager, Azure Key Vault</li>
+                </ul>
+            </section>
+
+            <section id="https">
+                <h2>🔒 HTTPS</h2>
+                <p>Always use HTTPS for production applications. This prevents:</p>
+                <ul>
+                    <li>Man-in-the-middle attacks</li>
+                    <li>Data interception</li>
+                    <li>Credential theft</li>
+                </ul>
+            </section>
+
+            <section id="authentication">
+                <h2>👤 Authentication</h2>
+                <p>Best practices:</p>
+                <ul>
+                    <li>Never disable authentication</li>
+                    <li>Use strong password hashing (bcrypt, argon2)</li>
+                    <li>Implement rate limiting</li>
+                    <li>Use secure session management</li>
+                    <li>Require HTTPS for auth endpoints</li>
+                </ul>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}
