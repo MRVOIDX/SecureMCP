@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify, send_file
 from src.controller import SecurityController
-from src.report_generator import ReportGenerator
+from src.enhanced_report_generator import EnhancedReportGenerator
 import os
 import json
 import zipfile
@@ -87,7 +87,8 @@ def scan_project():
 @app.route('/api/findings', methods=['GET'])
 def get_findings():
     try:
-        findings = controller.get_findings()
+        # Return only remaining findings (exclude applied/skipped)
+        findings = controller.get_remaining_findings()
         return jsonify({
             'success': True,
             'findings': findings
@@ -120,6 +121,17 @@ def skip_fix(finding_index):
             'error': str(e)
         }), 500
 
+@app.route('/api/fix-preview/<int:finding_index>', methods=['GET'])
+def get_fix_preview(finding_index):
+    try:
+        result = controller.get_fix_preview(finding_index)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 @app.route('/api/summary', methods=['GET'])
 def get_summary():
     try:
@@ -140,13 +152,20 @@ def generate_report():
         data = request.json or {}
         format_type = data.get('format', 'pdf')
         
-        findings = controller.get_findings()
+        # Use original findings for accurate reporting (before any modifications from apply/skip)
+        findings = controller.get_original_findings()
         applied_fixes = controller.get_applied_fixes()
         summary = controller.get_summary()
         project_path = controller.scan_results.get('project_path', '.') if controller.scan_results else '.'
         
-        report_gen = ReportGenerator(project_path, findings, applied_fixes, summary)
+        # Create enhanced report generator
+        report_gen = EnhancedReportGenerator(project_path, findings, applied_fixes, summary)
         
+        # Create reports directory
+        reports_dir = Path('reports')
+        reports_dir.mkdir(exist_ok=True)
+        
+        # Generate report based on format
         if format_type == 'pdf':
             try:
                 content = report_gen.generate_pdf()
@@ -155,27 +174,26 @@ def generate_report():
             except Exception as e:
                 return jsonify({
                     'success': False,
-                    'error': f'PDF generation failed: {str(e)}. Falling back to Markdown.'
+                    'error': f'PDF generation failed: {str(e)}. Falling back to HTML.'
                 }), 500
         elif format_type == 'html':
             content = report_gen.generate_html()
             filename = f'security_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.html'
             is_binary = False
         else:
-            content = report_gen.generate_markdown()
-            filename = f'security_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.md'
-            is_binary = False
+            # Default to PDF
+            content = report_gen.generate_pdf()
+            filename = f'security_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
+            is_binary = True
         
-        reports_dir = Path('reports')
-        reports_dir.mkdir(exist_ok=True)
-        
+        # Save report file
         report_path = reports_dir / filename
         if is_binary:
             with open(report_path, 'wb') as f:
-                f.write(content)
+                f.write(content if isinstance(content, bytes) else content.encode('utf-8'))
         else:
             with open(report_path, 'w', encoding='utf-8') as f:
-                f.write(content)
+                f.write(content if isinstance(content, str) else content.decode('utf-8'))
         
         return jsonify({
             'success': True,
@@ -205,6 +223,50 @@ def download_report(filename):
                 'success': False,
                 'error': 'Report not found'
             }), 404
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/generate-ai-fix/<int:finding_index>', methods=['POST'])
+def generate_ai_fix(finding_index):
+    """Generate a fixed version of the file using Groq AI."""
+    try:
+        result = controller.generate_ai_fix(finding_index)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/download-fixed-file/<int:finding_index>', methods=['POST'])
+def download_fixed_file(finding_index):
+    """Download the AI-generated fixed file."""
+    try:
+        data = request.json or {}
+        fixed_content = data.get('fixed_content', '')
+        filename = data.get('filename', 'fixed_file.txt')
+        
+        if not fixed_content:
+            return jsonify({
+                'success': False,
+                'error': 'No fixed content provided'
+            }), 400
+        
+        buffer = BytesIO()
+        buffer.write(fixed_content.encode('utf-8'))
+        buffer.seek(0)
+        
+        fixed_filename = f"fixed_{filename}"
+        
+        return send_file(
+            buffer,
+            mimetype='text/plain',
+            as_attachment=True,
+            download_name=fixed_filename
+        )
     except Exception as e:
         return jsonify({
             'success': False,

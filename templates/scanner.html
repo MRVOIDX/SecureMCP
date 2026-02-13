@@ -113,6 +113,63 @@
     </div>
 </div>
 
+<div id="fixPreviewModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">Fix Preview</h2>
+            <button class="modal-close" onclick="closeFixModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="fixNotAvailable" style="display: none;">
+                <div class="fix-not-available-msg">
+                    <span class="warning-icon">⚠️</span>
+                    <p>This issue cannot be automatically fixed. Please review the suggested fix and apply it manually.</p>
+                </div>
+                <div id="manualFixSuggestion" class="manual-fix-suggestion"></div>
+            </div>
+            <div id="fixPreviewContent" style="display: none;">
+                <div class="fix-info">
+                    <div class="fix-file-info">
+                        <span id="previewFile"></span>
+                        <span id="previewLine"></span>
+                    </div>
+                    <div id="previewSeverity" class="finding-badge"></div>
+                </div>
+                <div class="fix-description" id="previewDescription"></div>
+                
+                <div class="code-comparison">
+                    <div class="code-panel before-panel">
+                        <div class="code-panel-header">
+                            <span class="panel-icon">❌</span> Before (Current Code)
+                        </div>
+                        <div class="code-block" id="beforeCode"></div>
+                    </div>
+                    <div class="code-arrow">➜</div>
+                    <div class="code-panel after-panel">
+                        <div class="code-panel-header">
+                            <span class="panel-icon">✅</span> After (Fixed Code)
+                        </div>
+                        <div class="code-block" id="afterCode"></div>
+                    </div>
+                </div>
+                
+                <div id="contextSection" class="context-section">
+                    <h4>Code Context</h4>
+                    <div class="code-context" id="codeContext"></div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="modalApplyBtn" class="btn btn-primary" onclick="confirmApplyFix()">
+                <span class="btn-icon">✅</span> Apply Fix
+            </button>
+            <button id="modalSkipBtn" class="btn btn-secondary" onclick="confirmSkipFix()">
+                <span class="btn-icon">⏭️</span> Skip
+            </button>
+            <button class="btn btn-secondary" onclick="closeFixModal()">Cancel</button>
+        </div>
+    </div>
+</div>
 
 {% endblock %}
 

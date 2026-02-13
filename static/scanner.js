@@ -1,5 +1,8 @@
 let currentFindings = [];
 let currentReportFilename = null;
+let currentFixIndex = null; // index in currentFindings array (UI list)
+let currentFixOriginalIndex = null; // original index in backend list
+let currentFixData = null;
 
 // Upload functionality
 const uploadArea = document.getElementById('uploadArea');
@@ -182,12 +185,322 @@ function displayFindings(findings) {
 }
 
 async function applyFix(index) {
+    currentFixIndex = index;
+    currentFixOriginalIndex = currentFindings[index]?.original_index ?? index;
+    currentFixData = null;
+    const targetIndex = currentFixOriginalIndex ?? index;
+    
+    const modal = document.getElementById('fixPreviewModal');
+    const fixNotAvailable = document.getElementById('fixNotAvailable');
+    const fixPreviewContent = document.getElementById('fixPreviewContent');
+    const finding = currentFindings[index];
+    
+    document.getElementById('modalTitle').textContent = 'Generating AI Fix...';
+    fixNotAvailable.style.display = 'none';
+    fixPreviewContent.style.display = 'none';
+    
+    const loadingHtml = `
+        <div class="ai-loading">
+            <div class="loading-spinner"></div>
+            <p>Groq AI is analyzing and fixing the security issue...</p>
+        </div>
+    `;
+    fixPreviewContent.innerHTML = loadingHtml;
+    fixPreviewContent.style.display = 'block';
+    modal.style.display = 'flex';
+    
+    document.getElementById('modalApplyBtn').style.display = 'none';
+    
     try {
-        const response = await fetch(`/api/apply-fix/${index}`, { method: 'POST' });
+        const response = await fetch(`/api/generate-ai-fix/${targetIndex}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
         const data = await response.json();
         
         if (data.success) {
-            showToast('✅ Fix applied successfully!', 'success');
+            currentFixData = data;
+            showAIFixPreviewModal(data);
+        } else {
+            showManualFixModal(index, data.error);
+        }
+    } catch (error) {
+        showManualFixModal(index, error.message);
+    }
+}
+
+function showAIFixPreviewModal(data) {
+    const modal = document.getElementById('fixPreviewModal');
+    const fixNotAvailable = document.getElementById('fixNotAvailable');
+    const fixPreviewContent = document.getElementById('fixPreviewContent');
+    
+    fixNotAvailable.style.display = 'none';
+    
+    document.getElementById('modalTitle').textContent = 'AI-Generated Fix: ' + (data.finding.description || 'Security Issue');
+    
+    const previewHtml = `
+        <div class="fix-info">
+            <div class="fix-file-info">
+                <span id="previewFile">📄 ${escapeHtml(data.finding.file)}</span>
+                <span id="previewLine">📍 Line ${data.finding.line}</span>
+            </div>
+            <span class="finding-badge badge-${data.finding.severity.toLowerCase()}">${data.finding.severity}</span>
+        </div>
+        <div class="fix-description">
+            <strong>🤖 AI Fix Explanation:</strong> ${escapeHtml(data.fix_explanation || data.finding.suggested_fix || 'Security fix applied.')}
+        </div>
+        
+        <div class="code-comparison-full">
+            <div class="code-panel-full before-panel">
+                <div class="code-panel-header">
+                    <span class="panel-icon">❌</span> Original File (with issue)
+                </div>
+                <pre class="code-block-full">${escapeHtml(data.original_content.substring(0, 3000))}${data.original_content.length > 3000 ? '\n... (truncated)' : ''}</pre>
+            </div>
+            <div class="code-arrow-down">⬇️</div>
+            <div class="code-panel-full after-panel">
+                <div class="code-panel-header">
+                    <span class="panel-icon">✅</span> Fixed File (by Groq AI)
+                </div>
+                <pre class="code-block-full">${escapeHtml(data.fixed_content.substring(0, 3000))}${data.fixed_content.length > 3000 ? '\n... (truncated)' : ''}</pre>
+            </div>
+        </div>
+        
+        <div class="download-info">
+            <p>📥 Click <strong>"Apply & Download"</strong> to download the fixed file.</p>
+        </div>
+    `;
+    
+    fixPreviewContent.innerHTML = previewHtml;
+    fixPreviewContent.style.display = 'block';
+    
+    const applyBtn = document.getElementById('modalApplyBtn');
+    applyBtn.innerHTML = '<span class="btn-icon">📥</span> Apply & Download';
+    applyBtn.style.display = 'inline-flex';
+    
+    modal.style.display = 'flex';
+}
+
+function showFixPreviewModal(data) {
+    const modal = document.getElementById('fixPreviewModal');
+    const fixNotAvailable = document.getElementById('fixNotAvailable');
+    const fixPreviewContent = document.getElementById('fixPreviewContent');
+    
+    fixNotAvailable.style.display = 'none';
+    fixPreviewContent.style.display = 'block';
+    
+    document.getElementById('modalTitle').textContent = 'Fix Preview: ' + (data.finding.description || 'Security Issue');
+    document.getElementById('previewFile').innerHTML = '📄 ' + data.finding.file;
+    document.getElementById('previewLine').innerHTML = '📍 Line ' + data.finding.line;
+    
+    const severityBadge = document.getElementById('previewSeverity');
+    severityBadge.textContent = data.finding.severity;
+    severityBadge.className = 'finding-badge badge-' + data.finding.severity.toLowerCase();
+    
+    document.getElementById('previewDescription').textContent = data.finding.explanation || data.finding.suggested_fix || 'This fix will update the vulnerable code.';
+    
+    document.getElementById('beforeCode').textContent = data.original_code || '(no code)';
+    document.getElementById('afterCode').textContent = data.replacement_code || '(no replacement)';
+    
+    const contextSection = document.getElementById('contextSection');
+    const codeContext = document.getElementById('codeContext');
+    
+    if (data.context_before.length > 0 || data.context_after.length > 0) {
+        contextSection.style.display = 'block';
+        codeContext.innerHTML = '';
+        
+        data.context_before.forEach(line => {
+            codeContext.innerHTML += `
+                <div class="context-line">
+                    <span class="line-number">${line.line_num}</span>
+                    <span class="line-code">${escapeHtml(line.code)}</span>
+                </div>
+            `;
+        });
+        
+        codeContext.innerHTML += `
+            <div class="context-line highlight">
+                <span class="line-number">${data.finding.line}</span>
+                <span class="line-code">${escapeHtml(data.original_code)}</span>
+            </div>
+        `;
+        
+        codeContext.innerHTML += `
+            <div class="context-line new-code">
+                <span class="line-number">${data.finding.line}</span>
+                <span class="line-code">${escapeHtml(data.replacement_code)}</span>
+            </div>
+        `;
+        
+        data.context_after.forEach(line => {
+            codeContext.innerHTML += `
+                <div class="context-line">
+                    <span class="line-number">${line.line_num}</span>
+                    <span class="line-code">${escapeHtml(line.code)}</span>
+                </div>
+            `;
+        });
+    } else {
+        contextSection.style.display = 'none';
+    }
+    
+    document.getElementById('modalApplyBtn').style.display = 'inline-flex';
+    modal.style.display = 'flex';
+}
+
+function showManualFixModal(index, errorMessage = null) {
+    const modal = document.getElementById('fixPreviewModal');
+    const fixNotAvailable = document.getElementById('fixNotAvailable');
+    const fixPreviewContent = document.getElementById('fixPreviewContent');
+    const finding = currentFindings[index];
+    
+    fixPreviewContent.innerHTML = '';
+    fixPreviewContent.style.display = 'none';
+    fixNotAvailable.style.display = 'block';
+    
+    document.getElementById('modalTitle').textContent = 'Manual Fix Required';
+    
+    const manualFixSuggestion = document.getElementById('manualFixSuggestion');
+    let content = '';
+    
+    if (errorMessage) {
+        content += `<div class="error-msg"><strong>⚠️ AI Fix Unavailable:</strong> ${escapeHtml(errorMessage)}</div>`;
+        content += `<p class="error-help">The AI could not generate a fix automatically. Please review the suggestion below and apply it manually.</p>`;
+    }
+    
+    if (finding) {
+        content += `
+            <div class="manual-fix-details">
+                <p><strong>File:</strong> ${escapeHtml(finding.file || 'Unknown')}</p>
+                <p><strong>Line:</strong> ${finding.line || 'N/A'}</p>
+                <p><strong>Issue:</strong> ${escapeHtml(finding.description || 'Security issue')}</p>
+            </div>
+        `;
+        
+        if (finding.suggested_fix) {
+            content += `
+                <div class="suggested-fix-box">
+                    <h4>💡 Suggested Fix:</h4>
+                    <p>${escapeHtml(finding.suggested_fix)}</p>
+                </div>
+            `;
+        }
+        
+        if (finding.snippet) {
+            content += `
+                <div class="code-snippet-box">
+                    <h4>📝 Problematic Code:</h4>
+                    <pre class="code-snippet">${escapeHtml(finding.snippet)}</pre>
+                </div>
+            `;
+        }
+    } else {
+        content += '<p>Please review the code and apply the fix manually based on the security issue description.</p>';
+    }
+    
+    manualFixSuggestion.innerHTML = content;
+    
+    const applyBtn = document.getElementById('modalApplyBtn');
+    applyBtn.innerHTML = '<span class="btn-icon">✅</span> Mark as Reviewed';
+    applyBtn.style.display = 'inline-flex';
+    applyBtn.disabled = false;
+    
+    modal.style.display = 'flex';
+}
+
+function closeFixModal() {
+    document.getElementById('fixPreviewModal').style.display = 'none';
+    currentFixIndex = null;
+    currentFixOriginalIndex = null;
+    currentFixData = null;
+    
+    const applyBtn = document.getElementById('modalApplyBtn');
+    applyBtn.innerHTML = '<span class="btn-icon">✅</span> Apply Fix';
+}
+
+async function confirmApplyFix() {
+    if (currentFixIndex === null) return;
+    const targetIndex = currentFixOriginalIndex ?? currentFixIndex;
+    
+    const applyBtn = document.getElementById('modalApplyBtn');
+    
+    if (currentFixData && currentFixData.fixed_content) {
+        applyBtn.disabled = true;
+        applyBtn.innerHTML = '<span class="btn-icon">⏳</span> Downloading...';
+        
+        try {
+            const filename = currentFixData.filename || 'fixed_file.txt';
+            const mimeType = getMimeType(filename);
+            
+            const blob = new Blob([currentFixData.fixed_content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `fixed_${filename}`;
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 100);
+            
+            showToast('📥 Fixed file downloaded successfully!', 'success');
+            
+            const applyResp = await fetch(`/api/apply-fix/${targetIndex}`, { method: 'POST' });
+            const applyData = await applyResp.json();
+
+            if (!applyData.success) {
+                showToast(`Error applying fix: ${applyData.error || 'Unknown error'}`, 'error');
+                return;
+            }
+            
+            closeFixModal();
+            refreshFindings();
+        } catch (error) {
+            showToast(`Error: ${error.message}`, 'error');
+        } finally {
+            applyBtn.disabled = false;
+            applyBtn.innerHTML = '<span class="btn-icon">📥</span> Apply & Download';
+        }
+    } else {
+        applyBtn.disabled = true;
+        applyBtn.innerHTML = '<span class="btn-icon">⏳</span> Applying...';
+        
+        try {
+            const response = await fetch(`/api/apply-fix/${targetIndex}`, { method: 'POST' });
+            const data = await response.json();
+            
+            if (data.success) {
+                showToast('✅ Fix applied successfully!', 'success');
+                closeFixModal();
+                refreshFindings();
+            } else {
+                showToast(`Error: ${data.error}`, 'error');
+            }
+        } catch (error) {
+            showToast(`Error: ${error.message}`, 'error');
+        } finally {
+            applyBtn.disabled = false;
+            applyBtn.innerHTML = '<span class="btn-icon">✅</span> Apply Fix';
+        }
+    }
+}
+
+async function confirmSkipFix() {
+    if (currentFixIndex === null) return;
+    const targetIndex = currentFixOriginalIndex ?? currentFixIndex;
+    
+    try {
+        const response = await fetch(`/api/skip-fix/${targetIndex}`, { method: 'POST' });
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast('⏭️ Fix skipped', 'success');
+            closeFixModal();
             refreshFindings();
         } else {
             showToast(`Error: ${data.error}`, 'error');
@@ -198,8 +511,11 @@ async function applyFix(index) {
 }
 
 async function skipFix(index) {
+    currentFixIndex = index;
+    currentFixOriginalIndex = currentFindings[index]?.original_index ?? index;
+    
     try {
-        const response = await fetch(`/api/skip-fix/${index}`, { method: 'POST' });
+        const response = await fetch(`/api/skip-fix/${currentFixOriginalIndex ?? index}`, { method: 'POST' });
         const data = await response.json();
         
         if (data.success) {
@@ -234,7 +550,7 @@ async function generateReport() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ format: 'markdown' })
+            body: JSON.stringify({ format: 'pdf' })
         });
         
         const data = await response.json();
@@ -243,10 +559,13 @@ async function generateReport() {
             currentReportFilename = data.filename;
             document.getElementById('reportSection').style.display = 'block';
             
-            document.getElementById('viewReportBtn').onclick = () => viewReport(data.content);
+            document.getElementById('viewReportBtn').onclick = () => downloadReport(data.filename);
             document.getElementById('downloadReportBtn').onclick = () => downloadReport(data.filename);
             
-            showToast('📄 Report generated successfully!', 'success');
+            document.getElementById('viewReportBtn').textContent = '📥 Download & View PDF';
+            document.getElementById('downloadReportBtn').textContent = '⬇️ Download PDF';
+            
+            showToast('📄 PDF Report generated successfully!', 'success');
         } else {
             showToast(`Error: ${data.error}`, 'error');
         }
@@ -282,3 +601,42 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+function getMimeType(filename) {
+    const ext = filename.split('.').pop().toLowerCase();
+    const mimeTypes = {
+        'js': 'text/javascript',
+        'jsx': 'text/javascript',
+        'ts': 'text/typescript',
+        'tsx': 'text/typescript',
+        'py': 'text/x-python',
+        'java': 'text/x-java',
+        'c': 'text/x-c',
+        'cpp': 'text/x-c++',
+        'h': 'text/x-c',
+        'hpp': 'text/x-c++',
+        'cs': 'text/x-csharp',
+        'php': 'text/x-php',
+        'rb': 'text/x-ruby',
+        'go': 'text/x-go',
+        'rs': 'text/x-rust',
+        'swift': 'text/x-swift',
+        'kt': 'text/x-kotlin',
+        'html': 'text/html',
+        'htm': 'text/html',
+        'css': 'text/css',
+        'json': 'application/json',
+        'xml': 'application/xml',
+        'yaml': 'text/yaml',
+        'yml': 'text/yaml',
+        'md': 'text/markdown',
+        'txt': 'text/plain',
+        'sql': 'text/x-sql',
+        'sh': 'text/x-sh',
+        'bash': 'text/x-sh',
+        'env': 'text/plain',
+        'ini': 'text/plain',
+        'cfg': 'text/plain',
+        'toml': 'text/x-toml'
+    };
+    return mimeTypes[ext] || 'text/plain';
+}
